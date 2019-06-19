@@ -1,0 +1,5 @@
+{
+    "trainfolder":"./images/train",
+    "testfolder":"./images/test",
+    "tempfolder":"./images/temp"
+}
