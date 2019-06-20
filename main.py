@@ -60,6 +60,7 @@ for imgf in glob.glob(cfg.testfolder):
         distance = 0
         for result in results:
             if result:
+                print("image {}[{}] is match with image {}, distance {}".format(imgf, locindex, train_keys[index], distances[index]))
                 fnt = ImageFont.truetype("./assets/Hack-Regular.ttf", 14)
                 found = True
                 if distance==0:
@@ -68,13 +69,13 @@ for imgf in glob.glob(cfg.testfolder):
                 elif distances[index] < distance:
                     distance = distances[index]
                     selected = index
-            else:
-                index +=1
+            
+            index +=1
 
         if selected >= 0:
-            print("image {} is match with image {}".format(imgf, train_keys[selected]))
+            print("image {}[{}] is match with image {}".format(imgf, locindex, train_keys[selected]))
             draw.rectangle([left, top, right, bottom], outline="green", width=2)
-            draw.text([left, bottom+4], train_keys[selected], font=fnt, fill=(0,255,0,0))    
+            draw.text([left, bottom+4], "[{}]".format(locindex) + " is " + train_keys[selected], font=fnt, fill=(0,255,0,0))    
         locindex +=1
             
         if not found:
