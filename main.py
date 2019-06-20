@@ -52,7 +52,6 @@ for imgf in glob.glob(cfg.testfolder):
 
         top, right, bottom, left = loc
         draw = ImageDraw.Draw(pimg)
-        draw.rectangle([left, top, right, bottom], outline="green", width=3)
         
         found = False
         index = 0
@@ -60,9 +59,9 @@ for imgf in glob.glob(cfg.testfolder):
         for result in results:
             if result:
                 print("image {} is match with image {}".format(imgf, train_keys[index]))
-                #fnt = ImageFont.truetype("arial")
-                #fnt.size = 14
-                draw.text([left, bottom+4], train_keys[index])
+                fnt = ImageFont.truetype("/Users/ariefdarmawan/Downloads/fonts/Hack/Hack-Regular.ttf", 14)
+                draw.rectangle([left, top, right, bottom], outline="green", width=2)
+                draw.text([left, bottom+4], train_keys[index], font=fnt, fill=(0,120,0,0))
                 found = True
                 break
             else:
@@ -70,6 +69,7 @@ for imgf in glob.glob(cfg.testfolder):
         locindex +=1
             
         if not found:
+            draw.rectangle([left, top, right, bottom], outline="yellow", width=2)
             print("Image {} has no match with any trains data".format(imgf))
 
     pimg.save(cfg.dumpfolder + "{}_{}_{}.png".format(fileid, testindex, locindex))
