@@ -49,23 +49,32 @@ for imgf in glob.glob(cfg.testfolder):
     for loc in locs:
         fenc = fencs[locindex]
         results = fr.compare_faces(train_encodings, fenc, tolerance=0.4)
+        distances = fr.face_distance(train_encodings, fenc)
 
         top, right, bottom, left = loc
         draw = ImageDraw.Draw(pimg)
         
         found = False
         index = 0
-        #print("image {} compare results: {}".format(imgf, results))
+        selected = -1
+        distance = 0
         for result in results:
             if result:
-                print("image {} is match with image {}".format(imgf, train_keys[index]))
                 fnt = ImageFont.truetype("./assets/Hack-Regular.ttf", 14)
-                draw.rectangle([left, top, right, bottom], outline="green", width=2)
-                draw.text([left, bottom+4], train_keys[index], font=fnt, fill=(0,255,0,0))
                 found = True
-                break
+                if distance==0:
+                    distance = distances[index]
+                    selected = index
+                elif distances[index] < distance:
+                    distance = distances[index]
+                    selected = index
             else:
                 index +=1
+
+        if selected >= 0:
+            print("image {} is match with image {}".format(imgf, train_keys[selected]))
+            draw.rectangle([left, top, right, bottom], outline="green", width=2)
+            draw.text([left, bottom+4], train_keys[selected], font=fnt, fill=(0,255,0,0))    
         locindex +=1
             
         if not found:
