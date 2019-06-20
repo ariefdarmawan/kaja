@@ -72,5 +72,5 @@ for imgf in glob.glob(cfg.testfolder):
             draw.rectangle([left, top, right, bottom], outline="yellow", width=2)
             print("Image {} has no match with any trains data".format(imgf))
 
-    pimg.save(cfg.dumpfolder + "{}_{}_{}.png".format(fileid, testindex, locindex))
+    pimg.save(cfg.dumpfolder + "{}.png".format(fileid))
     testindex +=1
