@@ -3,3 +3,4 @@ class Config:
         self.trainfolder = ""
         self.testfolder = ""
         self.dumpfolder = ""
+        self.facefolder = ""

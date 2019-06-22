@@ -1,9 +1,12 @@
 from helper import config
 import sys
 import glob
+import cv2
+import numpy as np
 import face_recognition as fr
 from PIL import Image, ImageDraw, ImageFont
 from pathlib import Path
+from keras.models import load_model
 
 cfg = config.Config()
 trains = {}
@@ -11,6 +14,7 @@ trains = {}
 cfg.testfolder = "./images/test/*"
 cfg.trainfolder = "./images/train/*"
 cfg.dumpfolder = "./images/temp/"
+#cfg.facefolder = "./images/faces/"
 
 # run the train first
 for imgf in glob.glob(cfg.trainfolder):
@@ -34,6 +38,11 @@ train_encodings = list(trains.values())
 train_keys = list(trains.keys())
 #print("keys are: {}".format(train_keys))
 
+# emotion recod
+emotion_dict= {'Angry': 0, 'Sad': 5, 'Neutral': 4, 'Disgust': 1, 'Surprise': 6, 'Fear': 2, 'Happy': 3}
+model = load_model("models/model_v6_23.hdf5")
+
+fnt = ImageFont.truetype("./assets/Hack-Regular.ttf", 14)
 testindex = 0
 for imgf in glob.glob(cfg.testfolder):
 #print("test image {}".format(imgf))
@@ -52,16 +61,16 @@ for imgf in glob.glob(cfg.testfolder):
         distances = fr.face_distance(train_encodings, fenc)
 
         top, right, bottom, left = loc
+        cropped = pimg.crop([left, top, right, bottom])
+
         draw = ImageDraw.Draw(pimg)
-        
         found = False
         index = 0
         selected = -1
         distance = 0
         for result in results:
             if result:
-                print("image {}[{}] is match with image {}, distance {}".format(imgf, locindex, train_keys[index], distances[index]))
-                fnt = ImageFont.truetype("./assets/Hack-Regular.ttf", 14)
+                #print("image {}[{}] is match with image {}, distance {}".format(imgf, locindex, train_keys[index], distances[index]))
                 found = True
                 if distance==0:
                     distance = distances[index]
@@ -81,6 +90,17 @@ for imgf in glob.glob(cfg.testfolder):
         if not found:
             draw.rectangle([left, top, right, bottom], outline="yellow", width=2)
             print("Image {} has no match with any trains data".format(imgf))
+
+        # convert to cv2
+        cropped = np.array(cropped)  
+        cropped = cv2.resize(cropped, (48,48))
+        cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
+        cropped = np.reshape(cropped, [1, cropped.shape[0], cropped.shape[1], 1])
+
+        predicted_class = np.argmax(model.predict(cropped))
+        label_map = dict((v,k) for k,v in emotion_dict.items()) 
+        predicted_label = label_map[predicted_class]
+        draw.text([left, bottom+16], predicted_label, font=fnt, fill=(255,255,120,50))   
 
     pimg.save(cfg.dumpfolder + "{}.png".format(fileid))
     testindex +=1
