@@ -14,6 +14,8 @@ trains = {}
 cfg.testfolder = "./images/test/*"
 cfg.trainfolder = "./images/train/*"
 cfg.dumpfolder = "./images/temp/"
+cfg.model = "./models/fer-03.hdf5"
+cfg.input_shape = (48,48)
 #cfg.facefolder = "./images/faces/"
 
 # run the train first
@@ -39,10 +41,10 @@ train_keys = list(trains.keys())
 #print("keys are: {}".format(train_keys))
 
 # emotion recod
-emotion_dict= {'Angry': 0, 'Sad': 5, 'Neutral': 4, 'Disgust': 1, 'Surprise': 6, 'Fear': 2, 'Happy': 3}
-model = load_model("models/model_v6_23.hdf5")
+emotions = ["fear","disgust","neutral", "excited", "sad", "surprised","happy"]
+model = load_model(cfg.model)
 
-fnt = ImageFont.truetype("./assets/Hack-Regular.ttf", 14)
+fnt = ImageFont.truetype("./assets/Hack-Regular.ttf", 12)
 testindex = 0
 for imgf in glob.glob(cfg.testfolder):
 #print("test image {}".format(imgf))
@@ -93,14 +95,13 @@ for imgf in glob.glob(cfg.testfolder):
 
         # convert to cv2
         cropped = np.array(cropped)  
-        cropped = cv2.resize(cropped, (48,48))
+        cropped = cv2.resize(cropped, cfg.input_shape)
         cropped = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
         cropped = np.reshape(cropped, [1, cropped.shape[0], cropped.shape[1], 1])
 
         predicted_class = np.argmax(model.predict(cropped))
-        label_map = dict((v,k) for k,v in emotion_dict.items()) 
-        predicted_label = label_map[predicted_class]
-        draw.text([left, bottom+16], predicted_label, font=fnt, fill=(255,255,120,50))   
+        predicted_label = emotions[predicted_class]
+        draw.text([left, bottom+16], predicted_label, font=fnt, fill=(255,255,0,100))   
 
     pimg.save(cfg.dumpfolder + "{}.png".format(fileid))
     testindex +=1
